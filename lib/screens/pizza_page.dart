@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pizaa_app/data/pizza_data.dart';
+import 'package:pizaa_app/screens/cart_screen.dart';
 import 'package:pizaa_app/screens/pizza_detail_screen.dart';
 import 'package:pizaa_app/screens/widgets/custom_button.dart';
 import 'package:pizaa_app/utils/constants/app_colors.dart';
@@ -56,7 +57,23 @@ class PizzaPage extends StatelessWidget {
                 Icon(Icons.keyboard_arrow_down)
               ],
             ),
-            CutomFavIcon()
+            Stack(
+              children: [
+               
+           
+                   GestureDetector(onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => 
+                    CartScreen()));
+                   }, child: CutomFavIcon()),
+
+                   Positioned(child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: AppColors.yellowColor,
+                    child: Text('${pizzaCartList.length}', style: AppTextStyles.text14,),
+                   ))
+                
+              ],
+            )
           ],
         ),
       ),
@@ -71,32 +88,28 @@ class PizzaPage extends StatelessWidget {
 
           Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: GridView.builder(
-                    itemCount: pizzaData.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.60,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 0
+            padding: const EdgeInsets.all(16.0),
+            child: GridView.builder(
+                itemCount: pizzaData.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.60, crossAxisSpacing: 20, mainAxisSpacing: 0),
+                itemBuilder: (context, int index) {
+                  final model = pizzaData[index];
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: index.isOdd ? 0 : 60, bottom: index.isEven ? 0 : 60),
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PizzaDetail(
+                                      pizzaDetails: model,
+                                    ))),
+                        child: PizzaCard(model: model),
+                      ),
                     ),
-                    itemBuilder: (context, int index) {
-                      final model = pizzaData[index];
-                      return Center(
-                        child: Padding(
-                          padding:  EdgeInsets.only(top:  index.isOdd ? 0 : 60, bottom: index.isEven ? 0 :60),
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(context, 
-                            MaterialPageRoute(builder: (context) => 
-                            PizzaDetail(pizzaDetails: model,))),
-                            child: PizzaCard(
-                              model: model
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-              ))
+                  );
+                }),
+          ))
         ],
       ),
     );
@@ -196,16 +209,41 @@ class PizzaPage extends StatelessWidget {
   }
 }
 
-class PizzaCard extends StatelessWidget {
+class PizzaCard extends StatefulWidget {
   final PizzaModel model;
-  
+
   const PizzaCard({super.key, required this.model});
+
+  @override
+  State<PizzaCard> createState() => _PizzaCardState();
+}
+
+class _PizzaCardState extends State<PizzaCard> {
+  bool isFav = false; // variable to toggle the color
+
+  // the method to toggle/change the color
+  void toggleFav(){
+    setState(() {
+      isFav = !isFav;
+    });
+  }
+
+  /// Method to add item to cart
+  void addItemToCart() {
+    setState(() {
+      pizzaCartList.add(widget.model);
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: 
+    Text('Item Succesfully added to cart')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Container(
-          margin: EdgeInsets.only(top: 40,bottom: 10),
+          margin: EdgeInsets.only(top: 40, bottom: 10),
           // width: 174,
           // height: 180 ,
           decoration: BoxDecoration(
@@ -217,7 +255,7 @@ class PizzaCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                model.name,
+                widget.model.name,
                 style: AppTextStyles.text14,
               ),
               SizedBox(
@@ -235,7 +273,7 @@ class PizzaCard extends StatelessWidget {
                     width: 4,
                   ),
                   Text(
-                    model.description,
+                    widget.model.description,
                     style: AppTextStyles.text11,
                   )
                 ],
@@ -244,7 +282,7 @@ class PizzaCard extends StatelessWidget {
                 height: 10,
               ),
               Text(
-                model.price,
+                widget.model.price,
                 style: AppTextStyles.text14,
               ),
             ],
@@ -259,7 +297,7 @@ class PizzaCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
-                model.image,
+                widget.model.image,
                 fit: BoxFit.cover,
               ),
             ),
@@ -269,9 +307,16 @@ class PizzaCard extends StatelessWidget {
             right: 0,
             top: 20,
             child: SizedBox(
-                child: CutomFavIcon(
-              size: 10,
-            ))),
+                child: GestureDetector(
+                  onTap: (){
+                        addItemToCart();
+                        toggleFav();
+                  },
+                  child: CutomFavIcon(
+                    color: isFav ? AppColors.yellowColor : AppColors.checfBgColor,
+                                size: 10,
+                              ),
+                ))),
         Positioned(
             left: 50,
             bottom: 0,

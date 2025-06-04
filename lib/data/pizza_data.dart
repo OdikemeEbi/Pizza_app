@@ -39,3 +39,6 @@ image: ImageConstants.pizza4,
 price: '\$33'),
 
 ];
+
+/// The empty pizza cart LIST
+List<PizzaModel> pizzaCartList = [];
