@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pizaa_app/screens/home_page.dart';
+import 'package:pizaa_app/screens/pizza_page.dart';
+import 'package:pizaa_app/storage/user_storage.dart';
 
-void main() {
+Future<void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await UserPreferences.init();
+  UserPreferences.printFunction();
   runApp(const MyApp());
 }
 
@@ -18,8 +23,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       
-      
-      home: MyHomePage(),
+      /// If the user is Logged in Navigate the PizzaPage, 
+      /// Other Navigate to the MyHomePage
+      home: UserPreferences.isLoggedIn() ? PizzaPage() :   MyHomePage(),
     );
   }
 }
